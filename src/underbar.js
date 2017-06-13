@@ -165,25 +165,25 @@
 
   // Return the results of applying an iterator to each element.
   _.map = function(collection, iterator) {
-    // map() is a useful primitive iteration function that works a lot
-    // like each(), but in addition to running the operation on all
-    // the members, it also maintains an array of results.
-    var result = [];
-    // for(var i = 0; i < collection.length; i++){
-    //   result.push(iterator(collection[i]));
-    // }
+  // map() is a useful primitive iteration function that works a lot
+  // like each(), but in addition to running the operation on all
+  // the members, it also maintains an array of results.
+  var result = [];
+  // for(var i = 0; i < collection.length; i++){
+  //   result.push(iterator(collection[i]));
+  // }
 
-    //loop through the collection array
-      //for each item in the collection
-        //use the callback function on each item === iterator(elem)
-        //push the result of iterator(elem) into the results array
-    //return the result
+  //loop through the collection array
+    //for each item in the collection
+      //use the callback function on each item === iterator(elem)
+      //push the result of iterator(elem) into the results array
+  //return the result
 
-    _.each(collection, function(elem){
-      var value = iterator(elem);
-      result.push(value);
-    });
-    return result;
+  _.each(collection, function(elem){
+    var value = iterator(elem);
+    result.push(value);
+  });
+  return result;
   };
 
   /*
@@ -268,14 +268,49 @@
 
 
   // Determine whether all of the elements match a truth test.
+  //
   _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+  //   // TIP: Try re-using reduce() here.
+  //   var iterator = iterator || _.identity;
+  // return _.reduce(collection,function(acc,val){
+  //   if(acc){
+  //   return acc = iterator(val);
+  //   }else{
+  //     return !!acc  ;
+  //   }
+
+  // },true);
+
+  return (_.reduce(collection,function(acc,val){
+  if (isFunction(iterator)){
+    if(iterator(val)){
+      acc.push(val);
+    }
+  } else{
+      if(val){
+      acc.push(val);
+      }
+  }
+    return acc;
+
+  },[]).length === collection.length);
   };
+   function isFunction(functionToCheck) {
+   var getType = {};
+   return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+  }
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    return !_.every(collection, function(val) {
+      if (isFunction(iterator)){
+      return !iterator(val);
+      }else{
+       return !val;
+      }
+    });
   };
 
 
@@ -286,7 +321,7 @@
    * In this section, we'll look at a couple of helpers for merging objects.
    */
 
-  // Extend a given object with all the properties of the passed in
+    // Extend a given object with all the properties of the passed in
   // object(s).
   //
   // Example:
@@ -298,11 +333,32 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    for(var i=0;i<arguments.length;i++){
+
+      for(var key in arguments[i]){
+        obj[key]=arguments[i][key];
+      }
+    }
+    return obj;
+
   };
+
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
+
   _.defaults = function(obj) {
+
+    for(var i=1;i<arguments.length;i++){
+
+      for(var key in arguments[i]){
+        if(obj[key]===undefined){
+        obj[key]=arguments[i][key];
+        }
+      }
+  }
+  return obj;
+
   };
 
 
@@ -346,7 +402,22 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+        var cache = {};
+    return function() {
+      var key = JSON.stringify(arguments);
+      if(cache[key]) {
+        return cache[key];
+      }
+      else {
+        var val = func.apply(this, arguments);
+        cache[key] = val;
+        return val;
+      }
+    }
   };
+
+  // var memoAdd = new memoize(factorial);
+  // console.log(memoAdd(3));
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
@@ -355,6 +426,10 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args = [].slice.apply(arguments, [2]);
+    setTimeout(function() {
+      func.apply(null, args);
+    }, wait);
   };
 
 
@@ -369,6 +444,20 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+  //create copy of array
+    var copy = array.slice();
+    var temp;
+  //loop through array
+  for (var i = 0; i < array.length; i++) {
+    var random = Math.floor(Math.random() * array.length)+0;
+    //set variable to store random number for the length of array
+    temp = copy[i];
+    //set element of copied array to random number
+    copy[i] = copy[random];
+    //set copied array element to stored random number
+    copy[random] = temp;
+    }
+    return copy;
   };
 
 
